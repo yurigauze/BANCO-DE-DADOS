@@ -1,0 +1,103 @@
+01) Crie uma função que recebe um valor (decimal) e verifique se é positivo. 
+
+DROP FUNCTION IF EXISTS POSITIVO; -- eliminando a função 
+//POSITIVO
+DELIMITER // 
+CREATE FUNCTION POSITIVO(VALOR FLOAT)
+RETURNS boolean DETERMINISTIC
+BEGIN
+	DECLARE positivo boolean DEFAULT False;
+	IF valor >= 0 THEN
+		BEGIN
+			SET positivo = true;
+		END;
+	END IF;
+	RETURN positivo;
+END;
+//
+DELIMITER ;
+
+SELECT POSITIVO(5.0);
+SELECT POSITIVO(-5.0);
+
+02) Crie uma função que recebe um número e verifique se: é par ou ímpar e se é positivo ou negativo. 
+
+DROP FUNCTION IF EXISTS NUMERO; -- eliminando a função 
+//NUMERO
+DELIMITER // 
+CREATE FUNCTION NUMERO(VALOR FLOAT)
+RETURNS varchar(100) DETERMINISTIC
+
+BEGIN
+DECLARE NUMERO Varchar(100);
+DECLARE positivo varchar(100) DEFAULT "NEGATIVO";
+DECLARE par varchar(100) DEFAULT "IMPAR";
+	BEGIN
+
+		IF valor >= 0 THEN
+			BEGIN
+				SET positivo = "POSITIVO";
+			END;
+		END IF;
+		IF valor %2= 0 THEN
+			BEGIN
+				SET par = "PAR";
+			END;
+		END IF;
+
+	END;
+	SET NUMERO = CONCAT(positivo," E ", par);
+    RETURN NUMERO;
+END;
+
+//
+DELIMITER ;
+
+SELECT NUMERO(6.0);
+
+03) Crie uma função que recebe o nome e o sobrenome e retorno o nome completo. Para cliente inativos, informe "inativo". 
+DROP FUNCTION IF EXISTS ola; -- eliminando a função 
+DELIMITER // 
+CREATE FUNCTION ola(NOME VARCHAR(50), SOBRENOME VARCHAR(50), ATIVO CHAR(1)) -- função com if e else
+RETURNS VARCHAR(150) DETERMINISTIC
+BEGIN
+	DECLARE FRASE VARCHAR(100);
+	IF ATIVO = 'S' THEN
+		BEGIN
+			SET FRASE = CONCAT(NOME, " ", SOBRENOME);
+		END;
+	ELSE
+		BEGIN
+			SET FRASE ='CLIENTE INATIVO';
+        END;
+	END IF;
+	RETURN frase;
+END;
+//
+DELIMITER ;
+
+SELECT ola("YURI", "GAUZE", 'N'); -- testando função
+
+04) Crie uma função que recebe o código do cliente e retorne o nome completo, telefone e endereço. 
+USE BANCO;
+DROP FUNCTION IF EXISTS get_nome_cliente; -- eliminando a função 
+
+DELIMITER // 
+CREATE FUNCTION get_nome_cliente(codigo_cliente INT)  -- função com if e else
+RETURNS VARCHAR(500) DETERMINISTIC
+BEGIN
+	DECLARE FRASE VARCHAR(500);
+    DECLARE nome_cliente VARCHAR(100);
+    DECLARE FONE_cliente VARCHAR(100);
+    DECLARE ENDERECO_cliente VARCHAR(100);
+	SELECT NOME, FONE, ENDERECO INTO NOME_CLIENTE, FONE_CLIENTE, ENDERECO_CLIENTE  FROM CLIENTE WHERE CLIENTE.ID = codigo_cliente;
+    SET frase = CONCAT(nome_cliente, " - ", FONE_cliente, " - ", ENDERECO_cliente);
+    RETURN FRASE;
+END;
+//
+DELIMITER ;
+
+SELECT get_nome_cliente(1);
+
+05) Crie uma função que recebe o código do produto e retorne a quantidade geral vendida.
+
