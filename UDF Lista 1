@@ -100,4 +100,90 @@ DELIMITER ;
 SELECT get_nome_cliente(1);
 
 05) Crie uma função que recebe o código do produto e retorne a quantidade geral vendida.
+/*Crie uma função que recebe o código do produto e retorne a quantidade geral vendida. */
+USE BANCO;
+DROP FUNCTION IF EXISTS TOTAL_VENDIDO -- eliminando a função 
 
+DELIMITER // 
+CREATE FUNCTION TOTAL_VENDIDO(codigo_produto INT)
+RETURNS int DETERMINISTIC
+BEGIN
+	DECLARE TOTAL INT;
+		SELECT sum(IVENDA.QUANTIDADE) INTO TOTAL
+		FROM IVENDA, PRODUTO
+		WHERE IVENDA.PRODUTO_ID = PRODUTO.ID
+			AND PRODUTO.ID = codigo_produto;
+	RETURN TOTAL;
+END;
+//
+DELIMITER ;
+
+SELECT TOTAL_VENDIDO(1);
+
+06) Crie uma função que recebe um valor (decimal - preço de um produto) e retorne o máximo de desconto que pode ser dado (até 1 unidades - 2% de desnconto, até 3 unidades 4% de desconto e mais que 3 unidades 5% de desconto). 
+
+/*Crie uma função que recebe o código do produto e retorne a quantidade geral vendida. */
+USE BANCO;
+DROP FUNCTION IF EXISTS DESCONTO; -- eliminando a função 
+
+DELIMITER // 
+CREATE FUNCTION DESCONTO(VALOR FLOAT)
+RETURNS VARCHAR(500) DETERMINISTIC
+BEGIN
+	DECLARE FRASE VARCHAR(500);
+	DECLARE DESCONTO1 FLOAT; -- 2%
+  	DECLARE DESCONTO2 FLOAT; -- 3%
+ 	DECLARE DESCONTO3 FLOAT; -- 5%
+    
+    SET DESCONTO1 = VALOR*0.02;
+    SET DESCONTO2 = VALOR*0.03;
+    SET DESCONTO3 = VALOR*0.05;
+    SET FRASE = CONCAT("1 UNIDADE R$", DESCONTO1, " DE DESCONTO, 3 UNIDADE R$", DESCONTO2, " DE DESCONTO, 5 UNIDADE R$", DESCONTO3, " DE DESCONTO");
+	RETURN FRASE;
+END;
+//
+DELIMITER ;
+
+SELECT DESCONTO(700.00);
+
+07) Crie uma função que retorno o total de uma venda. 
+	DELIMITER // 
+	CREATE FUNCTION TOTAL_VENDA(VENDA INT)
+	RETURNS FLOAT DETERMINISTIC
+	BEGIN
+		DECLARE TOTAL FLOAT;
+		SELECT TOTAL INTO TOTAL	FROM VENDA	WHERE VENDA.ID = VENDA;
+
+		RETURN TOTAL;
+	END;
+	//
+	DELIMITER ;
+
+	SELECT TOTAL_VENDA(2);
+
+08) Crie uma função que receba o código da venda e retorno o nome do cliente. 
+
+	/*Crie uma função que recebe o código do produto e retorne a quantidade geral vendida. */
+	USE BANCO;
+	DROP FUNCTION IF EXISTS NOME_CLIENTE_VENDA; -- eliminando a função 
+
+	DELIMITER // 
+	CREATE FUNCTION NOME_CLIENTE_VENDA(VENDA INT)
+	RETURNS VARCHAR(100) DETERMINISTIC
+	BEGIN
+		DECLARE NOME VARCHAR(500) ;
+		SELECT NOME INTO NOME FROM CLIENTE, VENDA WHERE CLIENTE.ID = VENDA.CLIENTE_ID AND VENDA.ID = VENDA;
+		RETURN NOME;
+	END;
+	//
+	DELIMITER ;
+
+	SELECT NOME_CLIENTE_VENDA(2);
+    SELECT NOME_CLIENTE_VENDA(VENDA.ID) FROM VENDA;
+    DROP FUNCTION IF EXISTS NOME_CLIENTE_VENDA;
+    
+    
+09) Qual a diferença? Qual possui o melhor desempenho?
+O TESTE SEM USAR TABELA RETORNA UM UNICO VALOR PARA QUAL FOI ESCOLHIDO (CODIGO DA VENDA), JÁ A CONSULTA UTILIZA TODOS OS REGISTROS (VENDA.ID) DA TEBELA VENDA E RETORNA OS NOMES. A CONSULTA COM UM UNICO VALOR TEM UM DESEMPENHO MENOR
+10) Utilizamos a função get_nome_cliente, evitando JOIN. Qual a vantagem e a desvantagem? Em que caso devemos utilizar?
+11) Elabore 3 funções de acordo com o seu projeto utilizando parâmetos, select into e estrutura de decisão.
