@@ -154,3 +154,172 @@ END;
 DELIMITER ;
 
 SELECT IMC(2);
+
+DROP FUNCTION IF EXISTS SOMARATE;
+DELIMITER // 
+CREATE FUNCTION SOMARATE(LIMITE INT)
+RETURNS INT DETERMINISTIC
+BEGIN
+	DECLARE CONTADOR INT DEFAULT 0;
+    DECLARE FATORIAL INT;
+    WHILE CONTADOR < LIMITE DO
+		SET CONTADOR = CONTADOR +1;
+        SET FATORIAL = FATORIAL*NUMERO;
+        
+	END WHILE;
+    RETURN CONTADOR;
+END
+//
+DELIMITER ;
+
+SELECT CALCULAR_FATORIAL(4);
+
+
+DROP FUNCTION IF EXISTS SOMAR_ATE;
+DELIMITER // 
+CREATE FUNCTION SOMAR_ATE(LIMITE INT)
+RETURNS INT DETERMINISTIC
+BEGIN
+	DECLARE CONTADOR INT DEFAULT 0;
+	MEU_LOOP : LOOP
+		SET CONTADOR = CONTADOR +1;
+        IF CONTADOR >= LIMITE THEN
+			LEAVE MEU_LOOP;
+        END IF;
+    END LOOP  MEU_LOOP;
+    RETURN CONTADOR;
+END
+//
+DELIMITER ;
+SELECT SOMAR_ATE(5);
+
+
+
+DROP FUNCTION IF EXISTS SOMARATEE;
+DELIMITER // 
+CREATE FUNCTION SOMARATEE(LIMITE INT)
+RETURNS INT DETERMINISTIC
+BEGIN
+	DECLARE CONTADOR INT DEFAULT 0;
+    DECLARE CONTADOR2 INT;
+	REPEAT
+		SET CONTADOR = CONTADOR +1;
+		IF CONTADOR %2= 0 THEN
+			BEGIN
+				SET CONTADOR2 = CONTADOR2 + CONTADOR;
+                END;
+		END IF;
+	UNTIL CONTADOR >= LIMITE
+	END REPEAT;
+    RETURN CONTADOR2;
+END
+//
+DELIMITER ;
+
+SELECT SOMARATEE(8);
+
+
+DROP FUNCTION IF EXISTS CALCULAR_FATORIAL;
+DELIMITER // 
+CREATE FUNCTION CALCULAR_FATORIAL(NUMERO INT)
+RETURNS INT DETERMINISTIC
+BEGIN
+	DECLARE FATORIAL INT DEFAULT NUMERO;
+    IF NUMERO = 0 THEN
+			RETURN 1;
+    END IF;
+    WHILE NUMERO >1 DO
+		SET NUMERO = NUMERO -1;
+        SET FATORIAL = FATORIAL*NUMERO;
+        
+	END WHILE;
+    RETURN FATORIAL;
+END
+//
+DELIMITER ;
+
+SELECT CALCULAR_FATORIAL(5);
+
+
+O que é um cursor? Para que serve? Como funciona? Em que cenário são úteis? São semelhantes a qual recurso em linguagens de programação?
+CURSOR É UMA ESTRUTURA QUE PERMITE PERCORRER REGISTROS EM UM BANCO DE DADOS. Cursores permitem a manipulação de conjuntos de resultados completos de uma vez, este cenário, um cursor permite que linhas em um conjunto de resultados sejam processadas sequencialmente.
+
+12.	Após a prática do exercício anterior responda:
+    12.1.Para usar o cursor precisamos utilizar uma estrutura de repetição? Justifique.
+    Sim, o laço de repetição é necessario para que possa percorrer todos os registros
+    12.2.Na declaração, é necessário que vinculemos o cursor a qual recurso? Explique.
+    ao atributo que será utilizado para realizar a validação
+    12.3.Para percorrer um cursor utilizamos ponteiros. Qual comando move o ponteiro para o próximo registro? O que ocorre quando os registros acabam? O que é necessário para que a estrutura de repetição não entre em loop?
+    FETCH cursor_venda INTO codigo_produto; move o ponteiro para o proximo registro, definimos um handler que faz com que o loop seja encerrado ao acabar os registros
+
+
+/* 13.	Faça as funções abaixo: (O objetivo é entender gradativamente o cursor)
+    13.1.Escreva a estrutura básica de uma função com a declaração de 3 variáveis (resultado, acabou, qtde_cliente); Teste a função.
+    13.2.Reescreva a função anterior declarando um cursor de consulta de todos os clientes ativos; 
+    13.3.Reescreva a função anterior abrindo e fechando o cursor;
+    13.4.Reescreva a função anterior implementando a estrutura de repetição que percorra o loop;
+    13.5.Reescreva a função anterior, de modo que, colete e retorne a quantidade de clientes do loop;
+    13.6.Reescreva a função anterior, de modo que, colete e retorne a quantidade de clientes (pessoa física) do loop; 
+    13.7.Reescreva a função anterior, de modo que, calcule e retorne a média de idade dos clientes (pessoa física);
+14.	Tente implementar um cursor com base no estudo de caso. */
+USE BANCO;
+DROP FUNCTION IF EXISTS testecursor; -- eliminando a função 
+DELIMITER // 
+CREATE FUNCTION testecursor(cliente_id int)
+RETURNS int DETERMINISTIC
+BEGIN
+	DECLARE ACABOU int DEFAULT FALSE;
+    declare RESULTADO INT;
+    declare qtde_cliente int;
+    DECLARE CONSULTA_CLIENTE CURSOR FOR
+		SELECT CLIENTE.STATUS
+		FROM CLIENTE
+        where CLIENTE.ID = cliente_id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET ACABOU = TRUE;
+    OPEN CONSULTA_CLIENTE;
+    MEU_LOOP : LOOP
+		FETCH CONSULTA_CLIENTE INTO RESULTADO;
+        IF RESULTADO = FALSE THEN
+			BEGIN 
+            LEAVE MEU_LOOP;
+			END;
+		END IF;
+	END LOOP;
+    CLOSE CONSULTA_CLIENTE;
+    RETURN RESULTADO;
+END;
+//
+DELIMITER ;
+
+select testecursor(2);
+
+USE BANCO;
+DROP FUNCTION IF EXISTS testecursor; -- eliminando a função 
+DELIMITER // 
+CREATE FUNCTION testecursor(cliente_id int)
+RETURNS int DETERMINISTIC
+BEGIN
+	DECLARE ACABOU int DEFAULT FALSE;
+    declare RESULTADO INT;
+    declare qtde_cliente int;
+    DECLARE CONSULTA_CLIENTE CURSOR FOR
+		SELECT CLIENTE.STATUS
+		FROM CLIENTE
+        where CLIENTE.ID = cliente_id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET ACABOU = TRUE;
+    OPEN CONSULTA_CLIENTE;
+    MEU_LOOP : LOOP
+		FETCH CONSULTA_CLIENTE INTO RESULTADO;
+        IF RESULTADO = FALSE THEN
+			BEGIN 
+            LEAVE MEU_LOOP;
+			END;
+		END IF;
+	END LOOP;
+    CLOSE CONSULTA_CLIENTE;
+    RETURN RESULTADO;
+END;
+//
+DELIMITER ;
+
+select testecursor(2);
