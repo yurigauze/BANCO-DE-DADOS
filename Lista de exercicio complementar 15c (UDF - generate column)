@@ -14,4 +14,24 @@ STORED significa que o valor do campo é calculado (em operações de inserção
 4.	Escreva uma função que receba como parâmetro um e-mail, verifique se é válido (possui “@”) e retorne o resultado. Teste a função em uma das tabelas do estudo de caso. 
 
 5.	Escreva uma função que receba como parâmetro o código de um produto, verifique se o preço de venda está pelo menos 30% superior ao preço de compra e retorne o resultado. Em seguida, escreva um único comando que utilize a função criada para verificar os preços de todos os produtos cadastrados.
+  DROP FUNCTION IF EXISTS PRECOCUSTO;
+DELIMITER // 
+CREATE FUNCTION PRECOCUSTO(CODIGO_PRODUTO INT)
+RETURNS BOOLEAN DETERMINISTIC
+BEGIN
+	DECLARE VERDADEIRO BOOLEAN DEFAULT TRUE ;
+    DECLARE PRECO_CUSTO FLOAT;
+    DECLARE PRECO_VENDA FLOAT;
+		SELECT PRECO_CUSTO, PRECO_VENDA INTO PRECO_CUSTO, PRECO_VENDA FROM PRODUTO WHERE PRODUTO.ID = CODIGO_PRODUTO;
+        IF PRECO_VENDA <= (PRECO_CUSTO *1.30) THEN
+			BEGIN
+				SET VERDADEIRO = FALSE;
+			END;
+		END IF;
+	RETURN VERDADEIRO;
+END;
+//
+DELIMITER ;
+
+SELECT PRECOCUSTO(PRODUTO.ID) FROM PRODUTO
 6.	Considerando em que a coluna TOTAL da tabela COMPRA está desnormalizada, escreva uma única função que verifique a coesão de todos os totais da tabela compra.
