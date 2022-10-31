@@ -1,0 +1,79 @@
+-- gerar item caixa apos recebimento
+DELIMITER // 
+CREATE TRIGGER GERA_CAIXA
+BEFORE UPDATE ON parcela_receber FOR EACH ROW
+BEGIN 
+    INSERT caixa SET saldo = saldo + new.valor_quitado;
+END;
+//
+DELIMITER ;
+
+CREATE TRIGGER receber_apos_horario
+BEFORE INSERT ON recebiento FOR EACH ROW
+BEGIN 
+    IF NOT TIME(current_timestamp) between TIME('08:00:00') and TIME('18:00:00') THEN
+		signal sqlstate '45000' set message_text = 'horário não permitido';
+	END IF;
+END;
+//
+DELIMITER ;
+
+-- cliente inativo
+DELIMITER //
+CREATE PROCEDURE insercao_venda (id_cliente INT)
+BEGIN
+    DECLARE ativo CHAR; 
+    SELECT cliente.ativo INTO ativo FROM cliente WHERE cliente.id = id_cliente;
+    IF ativo = 'N' THEN
+    BEGIN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'CLIENTE INATIVO';
+    END;
+    END IF;
+    INSERT INTO venda (cliente_id) VALUES (id_cliente);
+END;
+//
+DELIMITER ;
+
+-- impedimento de venda sem item no estoque
+DELIMITER //
+CREATE PROCEDURE id_ordem_servico(id_peca INT, quantidade INT)
+BEGIN
+	DECLARE estoque INT;
+    SELECT estoque INTO estoque FROM peca WHERE peca.id = id_peca;
+	IF (quantidade > estoque) THEN
+    BEGIN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'NÃO POSSUI QUANTIDADE INFORMADA NO ESTOQUE';
+	END;
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE FUNCTION nome_cliente(codigo_cliente INT) 
+RETURNS VARCHAR(150) DETERMINISTIC
+BEGIN
+	DECLARE nome_cliente VARCHAR(100);
+	SELECT nome INTO nome_cliente FROM cliente WHERE id = codigo_cliente;
+    RETURN nome_cliente;
+END;
+//
+DELIMITER ;
+
+-- valida desconto
+
+RETURNS BOOLEAN DETERMINISTIC  
+BEGIN 
+    DECLARE valortotal DECIMAL(8,2); 
+    DECLARE desconto DECIMAL(8,2); 
+    DECLARE RESULTADO BOOLEAN DEFAULT FALSE;
+    SELECT total INTO valortotal FROM ordem_servico WHERE ordem_servico.id = venda;
+    SELECT desconto INTO desconto FROM ordem_servico WHERE ordem_servico.id = venda;
+    IF (desconto >= (total/2)) THEN
+			SET RESULTADO = TRUE;
+	END IF;
+    RETURN RESULTADO;
+END;
+//
+DELIMITER ;
+
